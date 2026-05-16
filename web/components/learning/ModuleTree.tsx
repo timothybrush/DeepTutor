@@ -23,6 +23,7 @@ interface ModuleTreeProps {
   masteryLevels: Record<string, number>;
   currentModuleId: string;
   currentStage: string;
+  onModuleClick?: (moduleId: string) => void;
 }
 
 function masteryColor(mastery: number, threshold: number): string {
@@ -35,10 +36,12 @@ function ModuleNode({
   module,
   masteryLevels,
   isCurrent,
+  onSelect,
 }: {
   module: Module;
   masteryLevels: Record<string, number>;
   isCurrent: boolean;
+  onSelect?: () => void;
 }) {
   const [expanded, setExpanded] = useState(isCurrent);
 
@@ -55,10 +58,13 @@ function ModuleNode({
   return (
     <div>
       <button
-        onClick={() => setExpanded((prev) => !prev)}
-        className={`flex items-center gap-1.5 w-full px-2 py-1.5 text-left text-sm rounded-md transition-colors ${
+        onClick={() => {
+          if (!isCurrent) onSelect?.();
+          setExpanded((prev) => !prev);
+        }}
+        className={`flex items-center gap-1.5 w-full px-2 py-1.5 text-left text-sm rounded-md transition-colors cursor-pointer ${
           isCurrent
-            ? "bg-[var(--primary)]/10 text-[var(--primary)]"
+            ? "bg-[var(--primary)]/10 ring-1 ring-[var(--primary)]/30 text-[var(--primary)]"
             : "text-[var(--foreground)] hover:bg-[var(--accent)]"
         }`}
       >
@@ -99,6 +105,7 @@ export default function ModuleTree({
   masteryLevels,
   currentModuleId,
   currentStage,
+  onModuleClick,
 }: ModuleTreeProps) {
   const { t } = useTranslation();
   const sorted = [...modules].sort((a, b) => a.order - b.order);
@@ -119,6 +126,7 @@ export default function ModuleTree({
           module={mod}
           masteryLevels={masteryLevels}
           isCurrent={mod.id === currentModuleId}
+          onSelect={() => onModuleClick?.(mod.id)}
         />
       ))}
     </div>

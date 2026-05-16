@@ -54,6 +54,17 @@ export default function LearningBookPage() {
   const [userInput, setUserInput] = useState("");
   const currentTurnRef = useRef<string>("");
 
+  const handleModuleClick = useCallback((moduleId: string) => {
+    if (moduleId === currentModuleId) return;
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: "change_module",
+        module_id: moduleId,
+      }));
+      setCurrentModuleId(moduleId);
+    }
+  }, [currentModuleId]);
+
   const fetchProgress = useCallback(() => {
     fetch(apiUrl(`/api/v1/learning/progress/${params.bookId}`), { credentials: "include" })
       .then((r) => r.json())
@@ -278,6 +289,7 @@ export default function LearningBookPage() {
               masteryLevels={masteryLevels}
               currentModuleId={currentModuleId}
               currentStage={currentStage}
+              onModuleClick={handleModuleClick}
             />
           </div>
         )}
